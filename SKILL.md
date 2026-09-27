@@ -1,0 +1,15 @@
+---
+name: "gokapi-file-sharing"
+description: "Send files to other people via Gokapi, or upload on request; ask retention, upload through the API, and return or deliver a download link."
+metadata: {"openclaw":{"emoji":"📤","primaryEnv":"GOKAPI_BASE_URL","requires":{"bins":["curl","python3"]}}}
+---
+
+# Gokapi file sharing
+
+1. When asked to send a file to anyone other than the agent's owner, use Gokapi unless the owner explicitly chose another transport. Also run for an explicit Gokapi upload. Identify the exact readable file and intended recipient or return channel; verify that the request authorizes external delivery. Stop if identity, file, or authority is unresolved.
+2. List secret-entry metadata and treat GOKAPI_BASE_URL and GOKAPI_API_KEY as two independent values. Obtain the owner's HTTPS URL, store it as a protected GOKAPI_BASE_URL entry through the local secret-store CLI or Settings (stdin/value-file, never a literal command argument), and bind its store SecretRef to skills.entries.gokapi-file-sharing.apiKey. This generic OpenClaw config field maps to GOKAPI_BASE_URL through primaryEnv; do not launch a misleading API-key-labeled prompt for the URL. Request only GOKAPI_API_KEY through the masked secrets prompt, with the exact Gokapi hostname as allowed host. Check protected egress and both variables in Gateway-host exec without reading or printing values. Stop before upload if either is missing.
+3. Ask the owner how many days the file may remain online unless the request already states it. The API accepts whole expiryDays: use a positive integer for finite retention, or 0 only on an explicit unlimited-time request. For hours or fractional days, explain the day granularity and get a compatible choice before upload. Default allowedDownloads to 0 (unlimited within the chosen retention) unless the owner gives a limit. Resolve both values before upload.
+4. Use Gateway-host exec so the protected GOKAPI_API_KEY sentinel can be substituted by the egress proxy. Use curl with environment variables, never literal credentials or a literal private endpoint. Accept only an HTTPS base URL without userinfo, query, or fragment; never follow redirects with the API key. POST multipart file, expiryDays, and allowedDownloads to /api/files/add. Follow references/api-upload.md for the exact request and chunked fallback. Require HTTP success and JSON Result=OK.
+5. Verify FileInfo.UrlDownload and returned expiry metadata against the requested retention. For upload-only, report the link and retention to the owner. For authorized send, deliver only the link to the verified recipient on the requested channel; do not send the source file again or post a private link to a broader chat. Report upload and delivery as distinct outcomes.
+
+The simple and chunked API uploads do not provide Gokapi end-to-end encryption. If client-side E2EE is required, use Gokapi's encrypted client workflow instead; server-side storage encryption is not E2EE.
