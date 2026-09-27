@@ -1,6 +1,6 @@
 # Gokapi File Sharing
 
-An OpenClaw skill for sending files to other people through a Gokapi instance, uploading on request, or revoking a share link. It asks for retention and an optional download limit before upload, then returns or delivers the link.
+An OpenClaw skill for sending files to other people through a Gokapi instance, uploading on request, or revoking a share link. It also proposes Gokapi for large files sent to yourself or files exceeding a channel's attachment limit; it does not upload those without your choice. It asks for retention and an optional download limit before upload, then returns or delivers the link.
 
 [Install from ClawHub](https://clawhub.ai/meska/skills/gokapi-file-sharing) or use the `SKILL.md` and `references/` directory in this repository.
 
